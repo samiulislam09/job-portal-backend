@@ -1,18 +1,19 @@
 const express = require("express");
-var bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
+const dotenv = require("dotenv");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
 const app = express();
-
+dotenv.config();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const jwtSecret = "ro8BS6Hiivgzy8Xuu09JDjlNLnSLldY5";
+const jwtSecret = `${process.env.JWT_SECRET}`;
 
-const uri = `mongodb+srv://jobportal:8E8MKqKW0u2pOukg@cluster0.lqyezba.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://jobportal:${process.env.MONGO_BD_SECRET}@cluster0.lqyezba.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -42,7 +43,6 @@ async function run() {
     //   user data by login with token
     app.post("/userData", (req, res) => {
       const { token } = req.body;
-      console.log(token);
       try {
         const user = jwt.verify(token, jwtSecret);
         const userEmail = user.email;
