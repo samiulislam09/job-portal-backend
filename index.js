@@ -12,6 +12,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const jwtSecret = `${process.env.JWT_SECRET}`;
+const bearerSecret = `${process.env.BEARER_TOKEN}`;
 
 const uri = `mongodb+srv://jobportal:${process.env.MONGO_BD_SECRET}@cluster0.lqyezba.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -24,6 +25,7 @@ async function run() {
   try {
     await client.connect();
     const userCollection = client.db("jobportal").collection("user");
+    const jobsCollection = client.db("jobportal").collection("jobs");
 
     //    login user
     app.post("/user-login", async (req, res) => {
@@ -57,7 +59,7 @@ async function run() {
       } catch {}
     });
 
-    //   added user  info to database
+    //   register
     app.post("/user", async (req, res) => {
       const userInfo = req.body;
       const email = userInfo.email;
@@ -69,7 +71,33 @@ async function run() {
       const result = await userCollection.insertOne(userInfo);
       res.send(result);
     });
-  } catch {}
+
+    // all jobs
+    app.post("/jobs", async (req, res) => {
+      const userToken = req.headers.authorization.split(" ")[1];
+      try {
+        if (userToken === bearerSecret) {
+          const data = await jobsCollection.find().toArray();
+          return res.json({ data, status: "ok" });
+        }
+      } catch (error) {
+        return res.json({ status: "error", data: error });
+      }
+    });
+
+    app.post("/edit-data", (req, res) => {
+      const userToken = req.headers.authorization.split(" ")[1];
+      console.log("user", userToken);
+      console.log("bearer", bearerSecret);
+      if (userToken == bearerSecret) {
+        console.log("milche");
+      } else {
+        console.log("mile nai");
+      }
+    });
+  } catch {
+    console.log("error");
+  }
 }
 
 run().catch(() => {
