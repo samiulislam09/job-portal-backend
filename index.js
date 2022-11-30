@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
 const app = express();
@@ -73,27 +73,45 @@ async function run() {
     });
 
     // all jobs
-    app.post("/jobs", async (req, res) => {
-      const userToken = req.headers.authorization.split(" ")[1];
-      try {
-        if (userToken === bearerSecret) {
-          const data = await jobsCollection.find().toArray();
-          return res.json({ data, status: "ok" });
-        }
-      } catch (error) {
-        return res.json({ status: "error", data: error });
-      }
+    app.get("/jobs", async (req, res) => {
+      const data = await jobsCollection.find().toArray();
+      res.send(data);
     });
 
-    app.post("/edit-data", (req, res) => {
-      const userToken = req.headers.authorization.split(" ")[1];
-      console.log("user", userToken);
-      console.log("bearer", bearerSecret);
-      if (userToken == bearerSecret) {
-        console.log("milche");
-      } else {
-        console.log("mile nai");
-      }
+    //  delete a  JOB
+    app.delete("/removejobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await jobsCollection.deleteOne(query);
+      res.send(result.data);
+    });
+
+    // update a  job
+    app.put("/updatejobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedUser = req.body;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          title: updatedUser.title,
+        },
+      };
+      const result = await jobsCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+      console.log("updated");
+    });
+
+    // update jobs category child
+    app.put("/updatechild/:id/:index", async (req, res) => {
+      const id = req.params.id;
+      const index = req.params.index;
+      const { title } = req.body;
+      const query = { _id: ObjectId(id) };
+      const result = await jobsCollection.updateOne(query, {
+        $set: { [`jobs.${index}`]: title },
+      });
+      res.send(result);
     });
   } catch {
     console.log("error");
