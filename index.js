@@ -26,7 +26,9 @@ async function run() {
     await client.connect();
     const userCollection = client.db("jobportal").collection("user");
     const jobsCollection = client.db("jobportal").collection("jobs");
-
+    app.get("/", (req, res) => {
+      res.send("App  running");
+    });
     //    login user
     app.post("/user-login", async (req, res) => {
       const { email, password } = req.body;
