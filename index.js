@@ -5,10 +5,10 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
+app.use(cors());
 const app = express();
 dotenv.config();
 app.use(bodyParser.json());
-app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const jwtSecret = `${process.env.JWT_SECRET}`;
