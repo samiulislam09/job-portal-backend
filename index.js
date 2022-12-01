@@ -12,7 +12,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 const jwtSecret = `${process.env.JWT_SECRET}`;
-const bearerSecret = `${process.env.BEARER_TOKEN}`;
 
 const uri = `mongodb+srv://jobportal:${process.env.MONGO_BD_SECRET}@cluster0.lqyezba.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
