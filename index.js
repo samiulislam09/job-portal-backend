@@ -77,6 +77,13 @@ async function run() {
       const data = await jobsCollection.find().toArray();
       res.send(data);
     });
+    //   Add jobs
+    app.post("/jobs", async (req, res) => {
+      const title = req.body.title;
+      console.log(title);
+      const result = await jobsCollection.insertOne({ title });
+      res.send(result);
+    });
 
     //  delete a  JOB
     app.delete("/removejobs/:id", async (req, res) => {
@@ -110,6 +117,32 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const result = await jobsCollection.updateOne(query, {
         $set: { [`jobs.${index}`]: title },
+      });
+      res.send(result);
+    });
+
+    // delete jobs category child
+    app.put("/deletechild/:id/:jobName", async (req, res) => {
+      const id = req.params.id;
+      const jobName = req.params.jobName;
+      const query = { _id: ObjectId(id) };
+      const result = await jobsCollection.findOneAndUpdate(query, {
+        $pull: {
+          jobs: jobName,
+        },
+      });
+      res.send(result);
+    });
+
+    // delete jobs category child
+    app.post("/addchild/:id", async (req, res) => {
+      const id = req.params.id;
+      const title = req.body.title;
+      const query = { _id: ObjectId(id) };
+      const result = await jobsCollection.findOneAndUpdate(query, {
+        $addToSet: {
+          jobs: title,
+        },
       });
       res.send(result);
     });
